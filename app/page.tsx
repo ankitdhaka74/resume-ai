@@ -1,7 +1,15 @@
+import Navbar from "@/components/Navbar";
+import Hero from "@/components/Hero";
+import Features from "@/components/Features";
+import HowItWorks from "@/components/HowItWorks";
+
 export default function Home() {
   return (
-    <main>
-      <h1>ResumeAI</h1>
-    </main>
+    <>
+      <Navbar />
+      <Hero />
+      <Features />
+      <HowItWorks />
+    </>
   );
 }
