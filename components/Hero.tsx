@@ -56,7 +56,7 @@ export default function Hero() {
             transition={{ delay: 0.5 }}
             className="mt-10 flex flex-wrap gap-4"
           >
-          <Link href="/analyze">  
+          <Link href="/analysis">  
             <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold shadow-lg transition">
               🚀 Analyze Resume
             </button>
@@ -71,7 +71,7 @@ export default function Hero() {
               className="border border-gray-300 hover:bg-gray-100 text-gray-700 px-8 py-4 rounded-xl font-semibold transition">
               ▶ Watch Demo
             </button>
-            
+
           </motion.div>
 
           {/* Trust Badges */}
