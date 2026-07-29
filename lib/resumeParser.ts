@@ -1,5 +1,5 @@
 import { PdfReader } from "pdfreader";
-import mammoth from "mammoth";
+import * as mammoth from "mammoth";
 
 export async function extractResumeText(file: File): Promise<string> {
   const buffer = Buffer.from(await file.arrayBuffer());

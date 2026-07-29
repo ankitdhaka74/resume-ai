@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Sparkles, FileText, CheckCircle } from "lucide-react";
+import Link from "next/link";
 
 export default function Hero() {
   return (
@@ -55,13 +56,22 @@ export default function Hero() {
             transition={{ delay: 0.5 }}
             className="mt-10 flex flex-wrap gap-4"
           >
+          <Link href="/analyze">  
             <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold shadow-lg transition">
               🚀 Analyze Resume
             </button>
+          </Link>
 
-            <button className="border border-gray-300 hover:bg-gray-100 text-gray-700 px-8 py-4 rounded-xl font-semibold transition">
+            <button 
+              onClick={() =>
+                document.getElementById("how-it-works")?.scrollIntoView({
+                  behavior: "smooth",
+                })
+              }     
+              className="border border-gray-300 hover:bg-gray-100 text-gray-700 px-8 py-4 rounded-xl font-semibold transition">
               ▶ Watch Demo
             </button>
+            
           </motion.div>
 
           {/* Trust Badges */}
