@@ -34,11 +34,15 @@ export default function UploadBox() {
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [jobDescription, setJobDescription] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
       setFile(acceptedFiles[0]);
       setAnalysis(null);
+      setError("");
+      setSuccess("");
     }
   }, []);
 
@@ -46,6 +50,7 @@ export default function UploadBox() {
     onDrop,
     multiple: false,
     maxSize: 5 * 1024 * 1024,
+    disabled: loading,
     accept: {
       "application/pdf": [".pdf"],
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
@@ -58,6 +63,8 @@ export default function UploadBox() {
 
     try {
       setLoading(true);
+      setError("");
+      setSuccess("");
 
       const formData = new FormData();
       formData.append("resume", file);
@@ -77,11 +84,12 @@ export default function UploadBox() {
       }
 
       setAnalysis(data.ai);
+      setSuccess("Resume analyzed successfully!");
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Unknown Error";
 
-      alert(`❌ ${message}`);
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -117,11 +125,26 @@ export default function UploadBox() {
   return (
     <div className="max-w-5xl mx-auto">
 
+      {/* Notifications */}
+      {error && (
+        <div className="mb-6 rounded-xl border border-red-300 bg-red-50 p-4 text-red-700">
+          ❌ {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="mb-6 rounded-xl border border-green-300 bg-green-50 p-4 text-green-700">
+          ✅ {success}
+        </div>
+      )}
+
       {/* Upload Area */}
 
       <div
         {...getRootProps()}
-        className={`border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition ${
+        className={`border-2 border-dashed rounded-2xl p-12 text-center transition ${
+          loading ? "pointer-events-none opacity-60 bg-gray-50 cursor-not-allowed" : "cursor-pointer"
+        } ${
           isDragActive
             ? "border-blue-600 bg-blue-50"
             : "border-gray-300 hover:border-blue-400"
@@ -142,14 +165,14 @@ export default function UploadBox() {
           PDF or DOCX (Maximum 5MB)
         </p>
 
-        <Button className="mt-8">
+        <Button className="mt-8" disabled={loading}>
           Browse Files
         </Button>
       </div>
 
       {/* Selected File */}
 
-      {file && (
+      {file ? (
         <>
           <div className="mt-8 rounded-xl bg-white p-5 shadow-md flex items-center justify-between">
 
@@ -163,11 +186,10 @@ export default function UploadBox() {
               <div>
                 <p className="font-semibold">
                   📄 {file.name}
-
                 </p>
 
                 <p className="text-sm text-gray-500">
-                  {(file.size / 1024).toFixed(1)} KB
+                  {file.type.includes("pdf") ? "PDF" : "DOCX"} • {(file.size / 1024).toFixed(1)} KB
                 </p>
 
                 <p className="text-sm text-green-600">
@@ -177,19 +199,35 @@ export default function UploadBox() {
 
             </div>
 
-            <Button
-              disabled={loading}
-              onClick={handleAnalyseResume}
-            >
-              {loading ? (
-                <>
-                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                Analysing...
-                </>
-              ) : (
-                "Analyse Resume"
-              )}
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                disabled={loading}
+                onClick={() => {
+                  setFile(null);
+                  setAnalysis(null);
+                  setJobDescription("");
+                  setError("");
+                  setSuccess("");
+                }}
+              >
+                Remove
+              </Button>
+
+              <Button
+                disabled={loading}
+                onClick={handleAnalyseResume}
+              >
+                {loading ? (
+                  <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Analysing...
+                  </>
+                ) : (
+                  "Analyse Resume"
+                )}
+              </Button>
+            </div>
 
           </div>
 
@@ -213,6 +251,28 @@ export default function UploadBox() {
 
           </div>
         </>
+      ) : (
+        /* Empty State */
+        <div className="mt-8 rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center shadow-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600 mb-4">
+            <FileText size={24} />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-800">📄 Ready to Analyze</h3>
+          <p className="mt-1 text-sm text-gray-500 max-w-md mx-auto mb-4">
+            Upload your resume and optionally paste a job description.
+          </p>
+          <div className="text-sm text-gray-600 text-left max-w-xs mx-auto bg-gray-50 p-4 rounded-xl border border-gray-100">
+            <p className="font-medium mb-1 text-gray-700">You&apos;ll receive:</p>
+            <ul className="space-y-1 text-gray-500">
+              <li>• ATS Score</li>
+              <li>• Job Match</li>
+              <li>• AI Summary</li>
+              <li>• Strengths & Weaknesses</li>
+              <li>• Missing Skills</li>
+              <li>• Suggestions</li>
+            </ul>
+          </div>
+        </div>
       )}
 
       {/* Results */}
@@ -229,11 +289,8 @@ export default function UploadBox() {
 
             <Button>
 
-              <Download
-                className="mr-2 h-4 w-4"
-              />
-
-              Download PDF
+              <Download className="mr-2 h-4 w-4" />
+                Download PDF
 
             </Button>
 
