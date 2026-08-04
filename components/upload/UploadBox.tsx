@@ -16,23 +16,17 @@ import {
 
 import { Button } from "@/components/ui/button";
 import ScoreGauge from "@/components/ScoreGauge";
+import { Analysis } from "@/types/analysis";
+import { generateResumePdf } from "@/lib/generatePdf";
+import ScoreBreakdown from "@/components/ScoreBreakdown";
 
-interface Analysis {
-  summary?: string;
-  atsScore: number;
-  jobMatch?: number;
-  strengths: string[];
-  weaknesses: string[];
-  matchingSkills?: string[];
-  missingSkills?: string[];
-  missingKeywords: string[];
-  suggestions: string[];
-}
 
 export default function UploadBox() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [improving, setImproving] = useState(false);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
+  const [improvedResume, setImprovedResume] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -92,6 +86,38 @@ export default function UploadBox() {
       setError(message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImproveResume = async () => {
+    if (!file) return;
+
+    try {
+      setImproving(true);
+
+      const formData = new FormData();
+      formData.append("resume", file);
+
+      const res = await fetch("/api/improve", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to improve resume.");
+      }
+
+      setImprovedResume(data.improvedResume);
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to improve resume."
+      );
+    } finally {
+      setImproving(false);
     }
   };
 
@@ -227,6 +253,14 @@ export default function UploadBox() {
                   "Analyse Resume"
                 )}
               </Button>
+              <Button 
+                onClick={handleImproveResume}
+                disabled={!file || improving}
+              >
+                {improving ? "Improving..." : "✨ Improve Resume"}
+
+              </Button>
+
             </div>
 
           </div>
@@ -287,8 +321,13 @@ export default function UploadBox() {
               ATS Analysis Report
             </h2>
 
-            <Button>
-
+            <Button
+              onClick={() =>{
+                if (file && analysis) {
+                  generateResumePdf(file.name, analysis);
+                }
+              }}
+             > 
               <Download className="mr-2 h-4 w-4" />
                 Download PDF
 
@@ -333,6 +372,10 @@ export default function UploadBox() {
             )}
 
           </div>
+
+          {analysis.scoreBreakdown && (
+            <ScoreBreakdown breakdown={analysis.scoreBreakdown} />
+          )}
 
           {/* Analysis Cards */}
 
@@ -447,6 +490,17 @@ export default function UploadBox() {
         </div>
 
       )}
+      {improvedResume && (
+        <div className="mt-10 rounded-2xl border bg-white p-8 shadow-xl">
+          <h2 className="mb-6 text-3xl font-bold">
+            ✨ AI Improved Resume
+          </h2>
+
+          <pre className="whitespace-pre-wrap font-sans leading-7">
+            {improvedResume}
+          </pre>
+        </div>
+  )}
 
     </div>
 

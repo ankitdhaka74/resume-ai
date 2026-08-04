@@ -64,6 +64,15 @@ Return ONLY valid JSON in this exact format:
   "summary": "",
   "atsScore": 0,
   "jobMatch": 0,
+
+  "scoreBreakdown": {
+    "content": 0,
+    "skills": 0,
+    "formatting": 0,
+    "experience": 0,
+    "education": 0
+  },
+
   "strengths": [],
   "weaknesses": [],
   "matchingSkills": [],
@@ -73,14 +82,12 @@ Return ONLY valid JSON in this exact format:
 }
 
 Rules:
-- summary should be 2-3 professional sentences describing how well the resume matches the job and the biggest improvements.
-- atsScore must be between 0 and 100.
-- jobMatch must be between 0 and 100.
-- matchingSkills should include skills present in both resume and the job description.
-- missingSkills should include important skills required by the job but missing from the resume.
-- missingKeywords should contain ATS keywords absent from the resume.
-- suggestions should provide specific, actionable improvements.
-- Return ONLY valid JSON.
+- scoreBreakdown must contain realistic scores between 0 and 100.
+- content evaluates resume content quality.
+- skills evaluates technical skills.
+- formatting evaluates ATS friendliness.
+- experience evaluates work/project experience.
+- education evaluates education section.
 `
       : `
 You are a professional ATS Resume Analyzer.
@@ -95,6 +102,15 @@ Return ONLY valid JSON in this exact format:
 {
   "summary": "",
   "atsScore": 0,
+
+  "scoreBreakdown": {
+    "content": 0,
+    "skills": 0,
+    "formatting": 0,
+    "experience": 0,
+    "education": 0
+  },
+
   "strengths": [],
   "weaknesses": [],
   "missingKeywords": [],
@@ -102,12 +118,12 @@ Return ONLY valid JSON in this exact format:
 }
 
 Rules:
-- summary should briefly describe the overall quality of the resume in 2-3 sentences.
-- atsScore must be between 0 and 100.
-- Base the score only on the resume content.
-- Do not invent information.
-- suggestions should contain practical improvements.
-- Return ONLY valid JSON.
+- scoreBreakdown must contain realistic scores between 0 and 100.
+- content evaluates resume content quality.
+- skills evaluates technical skills.
+- formatting evaluates ATS friendliness.
+- experience evaluates work/project experience.
+- education evaluates education section.
 `;
 
     const completion = await client.chat.completions.create({
@@ -145,6 +161,13 @@ Rules:
       parsed = JSON.parse(cleanedResponse);
       parsed.summary ??= "No summary generated.";
       parsed.atsScore ??= 0;
+      parsed.scoreBreakdown ??= {
+        content: 0,
+        skills: 0,
+        formatting: 0,
+        experience: 0,
+        education: 0
+      };
       parsed.strengths ??= [];
       parsed.weaknesses ??= [];
       parsed.missingKeywords ??= [];
@@ -165,7 +188,7 @@ Rules:
         { status: 500 }
       );
     }
-
+    
     return NextResponse.json({
       success: true,
       ai: parsed,
