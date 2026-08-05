@@ -1,6 +1,6 @@
 "use client";
 
-import { ThemeToggle } from "@/components/common/ThemeToggle";
+import ThemeToggle from "@/components/common/ThemeToggle";
 
 export default function DashboardHeader() {
   const today = new Date().toLocaleDateString("en-US", {
