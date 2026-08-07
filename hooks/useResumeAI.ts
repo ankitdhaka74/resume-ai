@@ -24,6 +24,8 @@ export function useResumeAI() {
 
   const [coverLetter, setCoverLetter] = useState("");
 
+  const [historyId, setHistoryId] = useState("");
+
   const [interview, setInterview] = useState<InterviewPrep | null>(null);
 
   const [jobDescription, setJobDescription] = useState("");
@@ -44,8 +46,8 @@ export function useResumeAI() {
     setCoverLetter("");
     setInterview(null);
     setJobDescription("");
+    setHistoryId("");
     setError("");
-
 
     toast.success("Results cleared!");
   };
@@ -73,6 +75,36 @@ export function useResumeAI() {
       }
 
       setAnalysis(data.ai);
+
+      const historyResponse = await fetch("/api/history", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fileName: file.name,
+          originalResume: data.originalResume,
+          atsScore: data.ai.atsScore,
+          jobMatch: data.ai.jobMatch,
+          summary: data.ai.summary,
+          improvedResume: "",
+          coverLetter: "",
+        }),
+      });
+
+      console.log("History Status:", historyResponse.status);
+
+      const responseText = await historyResponse.text();
+
+      console.log("History Response:", responseText);
+
+      if (!historyResponse.ok) {
+        throw new Error(responseText);
+      }
+
+      const savedResume = JSON.parse(responseText);
+
+      setHistoryId(savedResume.id);     
 
       toast.success("Resume analyzed successfully!");
     } catch (error) {
@@ -108,6 +140,19 @@ export function useResumeAI() {
       }
 
       setImprovedResume(data.improvedResume);
+
+      // 👇 Update the existing history record with the improved resume
+      if (historyId) {
+        await fetch(`/api/history/${historyId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            improvedResume: data.improvedResume,
+          }),
+        });
+      }
 
       toast.success("Resume improved successfully!");
     } catch (error) {
@@ -150,6 +195,19 @@ export function useResumeAI() {
       }
 
       setCoverLetter(data.coverLetter);
+
+      // 👇 Update the existing history record with the cover letter
+      if (historyId) {
+        await fetch(`/api/history/${historyId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            coverLetter: data.coverLetter,
+          }),
+        });
+      }
 
       toast.success("Cover letter generated!");
     } catch (error) {
@@ -218,6 +276,9 @@ export function useResumeAI() {
 
     jobDescription,
     setJobDescription,
+
+    historyId,
+    setHistoryId,
 
     loading,
     setLoading,

@@ -192,6 +192,9 @@ Rules:
     return NextResponse.json({
       success: true,
       ai: parsed,
+
+      originalResume: resumeText,
+      
       extractedCharacters: resumeText.length,
     });
   } catch (error: unknown) {
