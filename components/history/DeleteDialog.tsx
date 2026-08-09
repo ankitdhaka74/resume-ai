@@ -1,77 +1,82 @@
 "use client";
 
+import { useState } from "react";
 import { Trash2 } from "lucide-react";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-interface Props {
-  id: string;
+interface DeleteDialogProps {
+  resumeId: string;
+  onDelete?: () => void;
 }
 
-export default function DeleteDialog({ id }: Props) {
-  const router = useRouter();
+export default function DeleteDialog({
+  resumeId,
+  onDelete,
+}: DeleteDialogProps) {
+  const [loading, setLoading] = useState(false);
 
-  async function handleDelete() {
+  const handleDelete = async () => {
     try {
-      const res = await fetch(`/api/history/${id}`, {
+      setLoading(true);
+
+      const res = await fetch(`/api/history/${resumeId}`, {
         method: "DELETE",
       });
 
       if (!res.ok) {
-        throw new Error();
+        throw new Error("Failed to delete resume");
       }
 
-      toast.success("Resume deleted successfully!");
-
-      router.refresh();
-    } catch {
-      toast.error("Failed to delete resume.");
+      onDelete?.();
+    } catch (error) {
+      console.error("Delete Error:", error);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <button className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-white hover:bg-red-700">
+      <AlertDialogTrigger>
+        <span className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-red-700">
           <Trash2 className="h-4 w-4" />
           Delete
-        </button>
+        </span>
       </AlertDialogTrigger>
 
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Delete Resume?
+            Delete Application?
           </AlertDialogTitle>
 
           <AlertDialogDescription>
+            Are you sure you want to delete this resume analysis?
             This action cannot be undone.
-            The resume analysis will be permanently deleted.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel>
+          <AlertDialogCancel disabled={loading}>
             Cancel
           </AlertDialogCancel>
 
           <AlertDialogAction
             onClick={handleDelete}
+            disabled={loading}
             className="bg-red-600 hover:bg-red-700"
           >
-            Delete
+            {loading ? "Deleting..." : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

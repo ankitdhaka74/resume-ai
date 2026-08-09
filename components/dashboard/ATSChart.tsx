@@ -10,7 +10,6 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  defs,
 } from "recharts";
 
 export default function ATSChart() {
@@ -28,9 +27,7 @@ export default function ATSChart() {
     <div className="rounded-3xl bg-white p-8 shadow-sm transition hover:shadow-xl dark:bg-slate-900">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">
-            ATS Score Trend
-          </h2>
+          <h2 className="text-2xl font-bold">ATS Score Trend</h2>
 
           <p className="text-sm text-slate-500">
             Your ATS performance over time
