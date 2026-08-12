@@ -13,6 +13,7 @@ export interface DashboardData {
     atsScore: number;
     summary: string;
     createdAt: string;
+    jobMatch: number | null;
   } | null;
 
   chart: {
@@ -41,19 +42,26 @@ export default function useDashboard() {
   useEffect(() => {
     async function loadDashboard() {
       try {
+        setLoading(true);
+
         const res = await fetch("/api/dashboard", {
           cache: "no-store",
         });
 
+        const json = await res.json();
+
         if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
+          throw new Error(
+            json.error || `HTTP ${res.status}`
+          );
         }
 
-        const json: DashboardData = await res.json();
-
         setData(json);
-      } catch (err) {
-        console.error("Dashboard fetch error:", err);
+      } catch (error) {
+        console.error(
+          "Dashboard fetch error:",
+          error
+        );
       } finally {
         setLoading(false);
       }
@@ -62,5 +70,8 @@ export default function useDashboard() {
     loadDashboard();
   }, []);
 
-  return { data, loading };
+  return {
+    data,
+    loading,
+  };
 }

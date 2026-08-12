@@ -1,9 +1,9 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
+
 import prisma from "@/lib/prisma";
 
 export const authOptions: NextAuthOptions = {
@@ -15,11 +15,6 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
 
-    GitHubProvider({
-      clientId: process.env.GITHUB_ID!,
-      clientSecret: process.env.GITHUB_SECRET!,
-    }),
-
     CredentialsProvider({
       name: "Credentials",
 
@@ -28,6 +23,7 @@ export const authOptions: NextAuthOptions = {
           label: "Email",
           type: "email",
         },
+
         password: {
           label: "Password",
           type: "password",
@@ -79,8 +75,6 @@ export const authOptions: NextAuthOptions = {
 
   secret: process.env.NEXTAUTH_SECRET,
 
-  debug: true,
-
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -92,32 +86,13 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       if (session.user && token.id) {
-        (session.user as { id?: string }).id = token.id as string;
+        (session.user as { id?: string }).id =
+          token.id as string;
       }
 
       return session;
     },
   },
 
-  events: {
-    async signIn(message) {
-      console.log("✅ SIGN IN EVENT");
-      console.log(message);
-    },
-
-    async createUser(message) {
-      console.log("✅ CREATE USER");
-      console.log(message);
-    },
-
-    async linkAccount(message) {
-      console.log("✅ LINK ACCOUNT");
-      console.log(message);
-    },
-
-    async session(message) {
-      console.log("✅ SESSION");
-      console.log(message);
-    },
-  },
+  debug: true,
 };
