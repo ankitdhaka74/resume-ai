@@ -82,7 +82,17 @@ export default async function ResumeDetailsPage({ params }: Props) {
         <p className="whitespace-pre-wrap leading-8 text-slate-700 dark:text-slate-300">
           {resume.summary}
         </p>
+
+      <div className="mt-6">
+        <DownloadReportButton
+          fileName={resume.fileName}
+          atsScore={resume.atsScore}
+          jobMatch={resume.jobMatch}
+          summary={resume.summary}
+        />
       </div>
+      </div>
+
 
       {/* Improved Resume */}
       <div className="rounded-3xl bg-white p-8 shadow-sm dark:bg-slate-900">

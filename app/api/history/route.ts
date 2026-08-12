@@ -17,15 +17,16 @@ export async function GET() {
     });
 
     return NextResponse.json(history);
-  } catch (error: any) {
-    console.error("GET HISTORY ERROR:", error);
+  } catch (error) {
+    console.error("History GET Error:", error);
 
     return NextResponse.json(
       {
-        error: error.message,
-        stack: error.stack,
+        error: error instanceof Error ? error.message : "Unknown Error",
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }
@@ -33,6 +34,8 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+
+    console.log("History Body:", body);
 
     const resume = await prisma.resumeAnalysis.create({
       data: {
@@ -46,16 +49,19 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    console.log("Saved Resume:", resume);
+
     return NextResponse.json(resume);
-  } catch (error: any) {
-    console.error("POST HISTORY ERROR:", error);
+  } catch (error) {
+    console.error("History POST Error:", error);
 
     return NextResponse.json(
       {
-        error: error.message,
-        stack: error.stack,
+        error: error instanceof Error ? error.message : "Unknown Error",
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }

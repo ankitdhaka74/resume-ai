@@ -8,13 +8,14 @@ export interface DashboardData {
   bestATS: number;
 
   latestResume: {
+    id: string;
     fileName: string;
     atsScore: number;
     summary: string;
     createdAt: string;
   } | null;
 
-    chart: {
+  chart: {
     date: string;
     ats: number;
   }[];
@@ -33,7 +34,6 @@ export default function useDashboard() {
     latestResume: null,
     chart: [],
     monthly: [],
-
   });
 
   const [loading, setLoading] = useState(true);
@@ -50,6 +50,7 @@ export default function useDashboard() {
         }
 
         const json: DashboardData = await res.json();
+
         setData(json);
       } catch (err) {
         console.error("Dashboard fetch error:", err);

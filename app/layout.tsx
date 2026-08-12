@@ -7,7 +7,6 @@ import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import AuthProvider from "@/components/providers/AuthProvider";
 import ResumeCoachWidget from "@/components/chat/ResumeCoachWidget";
-import Providers from "@/components/providers/ThemeProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -56,9 +55,14 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             {children}
-            <Toaster richColors position="top-right" />
+
+            <Toaster
+              richColors
+              position="top-right"
+            />
           </ThemeProvider>
         </AuthProvider>
+
         <ResumeCoachWidget />
       </body>
     </html>

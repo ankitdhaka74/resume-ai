@@ -36,7 +36,7 @@ export default function DashboardHeader() {
           {greeting} 👋
         </p>
 
-        <h1 className="mt-1 text-5xl font-extrabold tracking-tight">
+        <h1 className="mt-1 text-5xl font-extrabold tracking-tight text-slate-900">
           Welcome back,
           <span className="text-blue-600">
             {" "}

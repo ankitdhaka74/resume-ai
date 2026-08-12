@@ -1,7 +1,6 @@
 "use client";
 
 import CountUp from "react-countup";
-
 import {
   FileText,
   BarChart3,
@@ -17,88 +16,94 @@ export default function StatsCards() {
   const cards = [
     {
       title: "Total Analyses",
+      description: "Resumes analyzed so far",
       value: data.total,
       suffix: "",
       icon: FileText,
-      iconBg: "bg-blue-100 dark:bg-blue-900/40",
+      iconBg: "bg-blue-50",
       iconColor: "text-blue-600",
-      gradient: "from-blue-500 to-cyan-500",
+      border: "border-t-blue-500",
     },
     {
       title: "Average ATS",
+      description: "Average resume score",
       value: data.averageATS,
       suffix: "%",
       icon: BarChart3,
-      iconBg: "bg-green-100 dark:bg-green-900/40",
-      iconColor: "text-green-600",
-      gradient: "from-green-500 to-emerald-500",
+      iconBg: "bg-emerald-50",
+      iconColor: "text-emerald-600",
+      border: "border-t-emerald-500",
     },
     {
       title: "Best ATS",
+      description: "Highest score achieved",
       value: data.bestATS,
       suffix: "%",
       icon: Sparkles,
-      iconBg: "bg-purple-100 dark:bg-purple-900/40",
+      iconBg: "bg-purple-50",
       iconColor: "text-purple-600",
-      gradient: "from-purple-500 to-pink-500",
+      border: "border-t-purple-500",
     },
     {
       title: "Downloads",
+      description: "Generated files downloaded",
       value: 0,
       suffix: "",
       icon: Download,
-      iconBg: "bg-orange-100 dark:bg-orange-900/40",
+      iconBg: "bg-orange-50",
       iconColor: "text-orange-600",
-      gradient: "from-orange-500 to-red-500",
+      border: "border-t-orange-500",
     },
   ];
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map((card) => {
         const Icon = card.icon;
 
         return (
           <div
             key={card.title}
-            className="group relative overflow-hidden rounded-3xl bg-white p-6 shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl dark:bg-slate-900"
+            className={`group relative overflow-hidden rounded-2xl border border-slate-200 border-t-2 ${card.border} bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg`}
           >
-            {/* Gradient Strip */}
-            <div
-              className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${card.gradient}`}
-            />
-
-            <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-start justify-between">
               <div
-                className={`rounded-2xl p-3 ${card.iconBg}`}
+                className={`flex h-11 w-11 items-center justify-center rounded-xl ${card.iconBg}`}
               >
                 <Icon
-                  className={`h-7 w-7 ${card.iconColor}`}
+                  size={21}
+                  className={card.iconColor}
                 />
               </div>
 
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-500 dark:bg-slate-800">
-                Live
+              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-600">
+                ● Active
               </span>
             </div>
 
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-              {card.title}
-            </p>
+            <div className="mt-5">
+              <p className="text-xs font-medium text-slate-500">
+                {card.title}
+              </p>
 
-            <h2 className="mt-3 text-4xl font-bold text-slate-900 dark:text-white">
-              {loading ? (
-                "..."
-              ) : (
-                <>
-                  <CountUp
-                    end={card.value}
-                    duration={1.5}
-                  />
-                  {card.suffix}
-                </>
-              )}
-            </h2>
+              <h2 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
+                {loading ? (
+                  "..."
+                ) : (
+                  <>
+                    <CountUp
+                      end={card.value}
+                      duration={1.2}
+                    />
+                    {card.suffix}
+                  </>
+                )}
+              </h2>
+
+              <p className="mt-1 text-[11px] text-slate-400">
+                {card.description}
+              </p>
+            </div>
           </div>
         );
       })}

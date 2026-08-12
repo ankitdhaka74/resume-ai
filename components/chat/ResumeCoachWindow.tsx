@@ -266,30 +266,42 @@ export default function ResumeCoachWindow({ onClose }: Props) {
               <div
                 className={`max-w-[260px] rounded-2xl px-4 py-3 ${
                   msg.role === "assistant"
-                    ? "bg-white/90 shadow"
+                    ? "bg-white shadow text-slate-800"
                     : "bg-blue-600 text-white"
                 }`}
               >
                 <ReactMarkdown
                   components={{
                     h1: ({ children }) => (
-                      <h1 className="mb-2 text-xl font-bold">{children}</h1>
+                      <h1 className="mb-2 text-xl font-bold text-slate-900">
+                        {children}
+                      </h1>
                     ),
                     h2: ({ children }) => (
-                      <h2 className="mb-2 text-lg font-bold">{children}</h2>
+                      <h2 className="mb-2 text-lg font-bold text-slate-900">
+                        {children}
+                      </h2>
                     ),
                     p: ({ children }) => (
-                      <p className="mb-2 leading-7">{children}</p>
+                      <p className="mb-2 leading-7 text-slate-800">
+                        {children}
+                      </p>
                     ),
                     ul: ({ children }) => (
-                      <ul className="mb-2 list-disc pl-5">{children}</ul>
+                      <ul className="mb-2 list-disc pl-5 text-slate-800">
+                        {children}
+                      </ul>
                     ),
                     ol: ({ children }) => (
-                      <ol className="mb-2 list-decimal pl-5">{children}</ol>
+                      <ol className="mb-2 list-decimal pl-5 text-slate-800">
+                        {children}
+                      </ol>
                     ),
-                    li: ({ children }) => <li>{children}</li>,
+                    li: ({ children }) => (
+                      <li className="text-slate-800">{children}</li>
+                    ),
                     code: ({ children }) => (
-                      <code className="rounded bg-slate-200 px-1">
+                      <code className="rounded bg-slate-200 px-1 text-slate-900">
                         {children}
                       </code>
                     ),
@@ -336,7 +348,7 @@ export default function ResumeCoachWindow({ onClose }: Props) {
                 Resume AI
               </p>
 
-              <div className="max-w-[260px] rounded-2xl bg-white px-4 py-3 shadow">
+              <div className="max-w-[260px] rounded-2xl bg-white px-4 py-3 shadow text-slate-800">
                 {streamingText}
                 <span className="animate-pulse">|</span>
               </div>
@@ -350,8 +362,8 @@ export default function ResumeCoachWindow({ onClose }: Props) {
             animate={{ opacity: 1, y: 0 }}
             className="flex justify-start"
           >
-            <div className="rounded-2xl bg-white/90 px-4 py-3 shadow">
-              <div className="flex items-center gap-2 text-sm text-slate-500">
+            <div className="rounded-2xl bg-white shadow px-4 py-3">
+              <div className="flex items-center gap-2 text-sm text-slate-600">
                 Resume AI is typing
                 <span className="animate-pulse">|</span>
               </div>
@@ -365,14 +377,16 @@ export default function ResumeCoachWindow({ onClose }: Props) {
       {/* Suggested Questions */}
       {isEmptyState && (
         <div className="px-5 pb-5">
-          <p className="mb-3 text-sm font-semibold">Suggested Questions</p>
+          <p className="mb-3 text-sm font-semibold text-slate-800">
+            Suggested Questions
+          </p>
 
           <div className="flex flex-wrap gap-2">
             {suggestions.map((q) => (
               <button
                 key={q}
                 onClick={() => setInput(q)}
-                className="rounded-full border px-3 py-2 text-sm hover:bg-blue-50"
+                className="rounded-full border px-3 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700"
               >
                 {q}
               </button>
@@ -397,7 +411,7 @@ export default function ResumeCoachWindow({ onClose }: Props) {
                 ? "Ask anything..."
                 : `Ask about ${activeTab}...`
             }
-            className="flex-1 rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500"
+            className="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500"
           />
 
           <button

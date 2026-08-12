@@ -13,6 +13,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (password.length < 6) {
+      return NextResponse.json(
+        { error: "Password must be at least 6 characters." },
+        { status: 400 }
+      );
+    }
+
     const existingUser = await prisma.user.findUnique({
       where: {
         email,
@@ -32,23 +39,28 @@ export async function POST(req: NextRequest) {
       data: {
         name,
         email,
+        password: hashedPassword,
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      message: "Account created successfully.",
-    });
-  }  catch (error: any) {
-  console.error("REGISTER ERROR:", error);
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Account created successfully.",
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("REGISTER ERROR:", error);
 
-  return NextResponse.json(
-    {
-      error: error.message,
-    },
-    {
-      status: 500,
-    }
-  );
-}
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Something went wrong.",
+      },
+      { status: 500 }
+    );
+  }
 }

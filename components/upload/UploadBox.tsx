@@ -7,6 +7,7 @@ import ResultsGrid from "@/components/results/ResultsGrid";
 import { useResumeAI } from "@/hooks/useResumeAI";
 import JobDescription from "./JobDescription";
 
+
 export default function UploadBox() {
   const resume = useResumeAI();
 
