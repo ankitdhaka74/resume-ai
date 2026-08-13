@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   User,
   Mail,
@@ -9,6 +9,7 @@ import {
   Save,
   LogOut,
   Loader2,
+  Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -19,7 +20,49 @@ export default function ProfilePage() {
     session?.user?.name ?? ""
   );
 
+  const [profileImage, setProfileImage] = useState(
+    session?.user?.image ?? ""
+  );
+
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const res = await fetch("/api/profile", {
+          cache: "no-store",
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(
+            data.error || "Failed to load profile."
+          );
+        }
+
+        if (data.user) {
+          setName(data.user.name ?? "");
+          setProfileImage(data.user.image ?? "");
+        }
+      } catch (error) {
+        console.error("Profile loading error:", error);
+      } finally {
+        setProfileLoading(false);
+      }
+    }
+
+    if (session?.user) {
+      loadProfile();
+    }
+  }, [session]);
 
   if (status === "loading") {
     return (
@@ -49,6 +92,104 @@ export default function ProfilePage() {
       </main>
     );
   }
+
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const selectedFile = event.target.files?.[0];
+
+    if (!selectedFile) return;
+
+    try {
+      setUploadingImage(true);
+
+      const formData = new FormData();
+      formData.append("image", selectedFile);
+
+      const res = await fetch("/api/profile/image", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.error || "Failed to upload image."
+        );
+      }
+
+      // Show the uploaded image immediately
+      setProfileImage(data.user.image);
+
+      toast.success("Profile picture updated!");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to upload image."
+      );
+    } finally {
+      setUploadingImage(false);
+
+      // Allow selecting the same image again
+      event.target.value = "";
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error("Please fill all password fields.");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error("New password must be at least 6 characters.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("New passwords do not match.");
+      return;
+    }
+
+    try {
+      setChangingPassword(true);
+
+      const res = await fetch("/api/profile/password", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.error || "Failed to change password."
+        );
+      }
+
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+
+      toast.success("Password changed successfully.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to change password."
+      );
+    } finally {
+      setChangingPassword(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!name.trim()) {
@@ -128,9 +269,9 @@ export default function ProfilePage() {
               {/* Avatar */}
               <div className="relative">
 
-                {session.user.image ? (
+                {profileImage ? (
                   <img
-                    src={session.user.image}
+                    src={profileImage}
                     alt={displayName}
                     className="h-24 w-24 rounded-2xl border-4 border-white object-cover shadow-md"
                   />
@@ -140,13 +281,29 @@ export default function ProfilePage() {
                   </div>
                 )}
 
-                <button
-                  type="button"
-                  className="absolute -bottom-2 -right-2 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-blue-600 text-white shadow-sm transition hover:bg-blue-700"
+                <label
+                  className={`absolute -bottom-2 -right-2 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-blue-600 text-white shadow-sm transition hover:bg-blue-700 ${
+                    uploadingImage ? "pointer-events-none opacity-60" : ""
+                  }`}
                   title="Change profile photo"
                 >
-                  <Camera size={16} />
-                </button>
+                  {uploadingImage ? (
+                    <Loader2
+                      size={16}
+                      className="animate-spin"
+                    />
+                  ) : (
+                    <Camera size={16} />
+                  )}
+
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                    disabled={uploadingImage}
+                  />
+                </label>
 
               </div>
 
@@ -255,6 +412,120 @@ export default function ProfilePage() {
               </button>
 
             </div>
+          </div>
+        </div>
+
+        {/* Change Password */}
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-slate-900">
+              Change Password
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-500">
+              Update your password to keep your account secure.
+            </p>
+          </div>
+
+          <div className="space-y-5">
+
+            {/* Current Password */}
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                Current Password
+              </label>
+
+              <div className="relative">
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+
+                <input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) =>
+                    setCurrentPassword(e.target.value)
+                  }
+                  placeholder="Enter current password"
+                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
+            </div>
+
+            {/* New Password */}
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                New Password
+              </label>
+
+              <div className="relative">
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) =>
+                    setNewPassword(e.target.value)
+                  }
+                  placeholder="Enter new password"
+                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                Confirm New Password
+              </label>
+
+              <div className="relative">
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) =>
+                    setConfirmPassword(e.target.value)
+                  }
+                  placeholder="Confirm new password"
+                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
+            </div>
+
+            {/* Change Password Button */}
+            <div className="flex justify-end border-t border-slate-100 pt-6">
+              <button
+                type="button"
+                onClick={handleChangePassword}
+                disabled={changingPassword}
+                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {changingPassword ? (
+                  <>
+                    <Loader2
+                      size={17}
+                      className="animate-spin"
+                    />
+                    Changing...
+                  </>
+                ) : (
+                  <>
+                    <Lock size={17} />
+                    Change Password
+                  </>
+                )}
+              </button>
+            </div>
+
           </div>
         </div>
 
